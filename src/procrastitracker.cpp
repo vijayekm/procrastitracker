@@ -9,6 +9,9 @@
 #include "slaballoc.h"
 SlabAlloc pool;
 #include "tools.h"
+
+#include <SG_InputBoxLib.h>
+
 StringPool strpool;
 
 #ifdef __MINGW32__
@@ -260,6 +263,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
     int wmId, wmEvent;
     PAINTSTRUCT ps;
     HDC hdc;
+    //OutputDebugStringW(L"TT: WndProc..\r\n");
     switch (message) {
         case WM_COMMAND:
             wmId = LOWORD(wParam);
@@ -292,7 +296,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
                     char requestfilename[1000];
                     if (FileRequest(hWnd, requestfilename, sizeof(requestfilename),
                                     "exported_view.PT",
-                                    "ProcrastiTracker Database Files\0*.PT\0All Files\0*.*\0\0",
+                                    "TTracker Database Files\0*.TT\0All Files\0*.*\0\0",
                                     "Save Exported Database View As..."))
                         save(true, requestfilename);
                     break;
@@ -333,6 +337,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
         case WM_DESTROY: PostQuitMessage(0); break;
         case WM_USER + 1:  // tray icon
             if (lParam == WM_LBUTTONDBLCLK || lParam == WM_RBUTTONUP) {
+                OutputDebugStringW(L"TT: Need to validate password showing popup..\r\n");
+
+                LPCSTR code =
+                SG_InputBox::GetPasswordString("TTracker","Enter Code");
+                if (strcmp(code, "secretcode")) {
+                    OutputDebugStringW(L"TT: missmatched code..");
+                    break;
+                }
                 HMENU myMenu = CreatePopupMenu();
                 if (!myMenu) break;
 
@@ -500,6 +512,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
     timer_sample_val = prefs[PREF_SAMPLE].ival;
     launchhookthread();
     MSG msg;
+
     while (GetMessage(&msg, NULL, 0, 0)) {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
